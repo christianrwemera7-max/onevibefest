@@ -51,10 +51,7 @@
     "recharts": "^2.15.0",
     "date-fns": "^3.6.0",
     "react-day-picker": "^8.10.1",
-    "cloudinary": "^2.5.1",
-    "genkit": "latest",
-    "@genkit-ai/google-genai": "latest",
-    "@genkit-ai/next": "latest"
+    "cloudinary": "^2.5.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",

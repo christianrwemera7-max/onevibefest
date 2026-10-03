@@ -18,6 +18,7 @@ import { Countdown } from '@/components/Countdown';
 import { WaitlistDialog } from '@/components/WaitlistDialog';
 
 const DEFAULT_LOGO_URL = "https://res.cloudinary.com/dvz91qth6/image/upload/v1740261394/one-vibe-logo_t9v6v9.png";
+const FALLBACK_HERO_IMAGE = "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=1920";
 
 export default function LandingPage() {
   const firestore = useFirestore();
@@ -56,7 +57,6 @@ export default function LandingPage() {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-  // Carousel Hero logic
   const heroItems = useMemo(() => {
     const items = [];
     if (settings?.spotVideoUrl) items.push(settings.spotVideoUrl);
@@ -64,7 +64,7 @@ export default function LandingPage() {
     if (settings?.heroImageUrl3) items.push(settings.heroImageUrl3);
     
     if (items.length === 0) {
-      items.push("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmJueHl3N2ZreXV6N3R6N3R6N3R6N3R6N3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l41lTfuxV6ZoopSve/giphy.gif");
+      items.push(FALLBACK_HERO_IMAGE);
     }
     return items;
   }, [settings]);
@@ -81,7 +81,6 @@ export default function LandingPage() {
 
   return (
     <div className="relative min-h-screen flex flex-col bg-background overflow-x-hidden">
-      {/* HERO SECTION CAROUSEL */}
       <section className="relative h-screen flex flex-col items-center justify-center">
         <div className="absolute inset-0 z-0 overflow-hidden bg-black">
           <AnimatePresence mode="wait">
@@ -110,6 +109,7 @@ export default function LandingPage() {
                   className="object-cover opacity-60 brightness-110 contrast-125"
                   priority
                   unoptimized={true}
+                  data-ai-hint="festival concert"
                 />
               )}
             </motion.div>
@@ -147,7 +147,6 @@ export default function LandingPage() {
           </motion.div>
         </div>
 
-        {/* Indicators */}
         {heroItems.length > 1 && (
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex gap-3">
             {heroItems.map((_, i) => (
@@ -161,7 +160,6 @@ export default function LandingPage() {
         )}
       </section>
 
-      {/* VISION SECTION */}
       <section className="py-24 bg-background relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-10 relative z-10">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="space-y-4">
@@ -174,7 +172,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* TÊTES D'AFFICHE */}
       {talents && talents.length > 0 && (
         <section className="py-24 bg-background relative border-t border-white/5">
           <div className="max-w-7xl mx-auto px-6 mb-16 flex flex-col md:flex-row items-center justify-between gap-8">
@@ -205,7 +202,6 @@ export default function LandingPage() {
         </section>
       )}
 
-      {/* VIBE MOMENTS (GALLERY) */}
       <section className="py-24 bg-background relative overflow-hidden border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20 space-y-3">
@@ -241,7 +237,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* TEASER YOUTUBE */}
       <section className="py-24 bg-background relative border-t border-white/5">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16 space-y-3">
@@ -263,7 +258,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SPONSORS CRYSTAL-WHITE */}
       {sponsors && sponsors.length > 0 && (
         <section className="relative py-24 bg-background overflow-hidden border-t border-white/5">
           <div className="max-w-7xl mx-auto px-6">

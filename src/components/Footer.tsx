@@ -44,7 +44,6 @@ export function Footer() {
       <div className="max-w-7xl mx-auto relative z-10 px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 mb-12">
           
-          {/* LOGO & RÉSEAUX */}
           <div className="space-y-6">
             <div className="relative h-14 w-auto flex items-center">
               <img 
@@ -70,7 +69,6 @@ export function Footer() {
             </div>
           </div>
 
-          {/* CONTACT */}
           <div className="space-y-6">
             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-secondary italic border-l-2 border-secondary pl-4">CONTACT</h3>
             <ul className="space-y-5">
@@ -89,7 +87,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* PRO ACTION */}
           <div className="space-y-6">
             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-secondary italic border-l-2 border-secondary pl-4">PRO</h3>
             <div className="flex flex-col gap-4">

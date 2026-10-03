@@ -46,14 +46,12 @@ export default function AdminDashboard() {
 
   const [isUploading, setIsUploading] = useState<string | null>(null);
 
-  // States pour l'édition
   const [editingTalentId, setEditingTalentId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
   const [editingSponsorId, setEditingSponsorId] = useState<string | null>(null);
   const [editingMerchId, setEditingMerchId] = useState<string | null>(null);
   const [editingUniverseId, setEditingUniverseId] = useState<string | null>(null);
 
-  // Stats logic
   const analyticsRef = useMemoFirebase(() => firestore ? doc(firestore, 'analytics', 'global') : null, [firestore]);
   const { data: stats } = useDoc(analyticsRef);
 
@@ -81,7 +79,6 @@ export default function AdminDashboard() {
   const universesRef = useMemoFirebase(() => firestore ? collection(firestore, 'universes') : null, [firestore]);
   const { data: universes } = useCollection(universesRef);
 
-  // Form states
   const [logoUrl, setLogoUrl] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventLocation, setEventLocation] = useState('');
@@ -435,10 +432,6 @@ export default function AdminDashboard() {
                       <Button size="icon" className="h-14 w-14 bg-white/10 rounded-2xl" disabled={isUploading === 'bg'}><Upload className="w-4 h-4 text-white" /></Button>
                     </div>
                   </div>
-                </div>
-                <div className="space-y-4">
-                  <h3 className="text-[12px] font-black uppercase tracking-widest italic text-white/40 border-b border-white/5 pb-3">Teaser Vidéo</h3>
-                  <Input value={teaserInput} onChange={e => setTeaserInput(e.target.value)} placeholder="URL YouTube du Teaser" className="bg-black/40 border-white/10 h-14 rounded-2xl italic text-sm font-black" />
                 </div>
               </div>
               <Button onClick={handleSaveSettings} className="w-full bg-white text-primary font-black text-[11px] h-14 rounded-2xl italic border-none shadow-2xl">SAUVEGARDER MÉDIAS</Button>
