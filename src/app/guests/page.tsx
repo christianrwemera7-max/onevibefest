@@ -7,6 +7,7 @@ import { collection, doc } from 'firebase/firestore';
 import { User, Ticket, Star, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { WaitlistDialog } from '@/components/WaitlistDialog';
 
 export default function TalentsPage() {
   const firestore = useFirestore();
@@ -16,7 +17,7 @@ export default function TalentsPage() {
   const settingsRef = useMemoFirebase(() => firestore ? doc(firestore, 'settings', 'festival') : null, [firestore]);
   const { data: settings } = useDoc(settingsRef);
   
-  const ticketingUrl = settings?.ticketingUrl || 'https://omtevents.com';
+  const ticketingUrl = settings?.ticketingUrl;
 
   const categories = ["MUSIC", "CREATIVE", "BUSINESS", "DIGITAL"];
 
@@ -44,11 +45,15 @@ export default function TalentsPage() {
         </div>
 
         <div className="mb-12 md:mb-20 text-center px-4">
-          <Button asChild size="lg" className="bg-secondary text-black font-black text-[11px] md:text-[12px] h-14 md:h-16 px-8 md:px-14 rounded-2xl tracking-widest shadow-[0_0_40px_rgba(0,255,255,0.4)] transition-all hover:scale-105 border-none italic w-full sm:w-auto">
-            <a href={ticketingUrl} target="_blank">
-              <Ticket className="w-5 md:w-6 h-5 md:h-6 mr-2 md:mr-3" /> RÉSERVER MON BILLET
-            </a>
-          </Button>
+          {ticketingUrl ? (
+            <Button asChild size="lg" className="bg-secondary text-black font-black text-[11px] md:text-[12px] h-14 md:h-16 px-8 md:px-14 rounded-2xl tracking-widest shadow-[0_0_40px_rgba(0,255,255,0.4)] transition-all hover:scale-105 border-none italic w-full sm:w-auto">
+              <a href={ticketingUrl} target="_blank">
+                <Ticket className="w-5 md:w-6 h-5 md:h-6 mr-2 md:mr-3" /> RÉSERVER MON BILLET
+              </a>
+            </Button>
+          ) : (
+            <WaitlistDialog buttonClassName="w-full sm:w-auto" label="REJOINDRE LA LISTE D'ATTENTE" />
+          )}
         </div>
 
         {categories.map((cat) => {

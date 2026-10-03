@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Zap,
   Star,
@@ -15,12 +15,14 @@ import Link from 'next/link';
 import { useDoc, useCollection, useMemoFirebase, useFirestore } from '@/firebase';
 import { doc, collection, increment, setDoc } from 'firebase/firestore';
 import { Countdown } from '@/components/Countdown';
+import { WaitlistDialog } from '@/components/WaitlistDialog';
 
 const DEFAULT_LOGO_URL = "https://res.cloudinary.com/dvz91qth6/image/upload/v1740261394/one-vibe-logo_t9v6v9.png";
 
 export default function LandingPage() {
   const firestore = useFirestore();
   const [mounted, setMounted] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -42,12 +44,10 @@ export default function LandingPage() {
   const galleryRef = useMemoFirebase(() => firestore ? collection(firestore, 'gallery') : null, [firestore]);
   const { data: galleryItems } = useCollection(galleryRef);
   
-  const ticketingUrl = settings?.ticketingUrl || 'https://omtevents.com';
+  const ticketingUrl = settings?.ticketingUrl;
   const logoUrl = settings?.logoUrl || DEFAULT_LOGO_URL;
   
   const isVideo = (url?: string) => url?.match(/\.(mp4|webm|ogg|mov)$/i) || url?.includes('/video/upload/');
-
-  const heroMediaUrl = settings?.spotVideoUrl || settings?.heroGifUrl || "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmJueHl3N2ZreXV6N3R6N3R6N3R6N3R6N3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l41lTfuxV6ZoopSve/giphy.gif";
 
   const getYoutubeId = (url?: string) => {
     if (!url) return null;
@@ -56,36 +56,67 @@ export default function LandingPage() {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
+  // Carousel Hero logic
+  const heroItems = useMemo(() => {
+    const items = [];
+    if (settings?.spotVideoUrl) items.push(settings.spotVideoUrl);
+    if (settings?.heroImageUrl2) items.push(settings.heroImageUrl2);
+    if (settings?.heroImageUrl3) items.push(settings.heroImageUrl3);
+    
+    if (items.length === 0) {
+      items.push("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmJueHl3N2ZreXV6N3R6N3R6N3R6N3R6N3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l41lTfuxV6ZoopSve/giphy.gif");
+    }
+    return items;
+  }, [settings]);
+
+  useEffect(() => {
+    if (heroItems.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % heroItems.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [heroItems]);
+
   if (!mounted) return null;
 
   return (
     <div className="relative min-h-screen flex flex-col bg-background overflow-x-hidden">
-      {/* HERO SECTION */}
+      {/* HERO SECTION CAROUSEL */}
       <section className="relative h-screen flex flex-col items-center justify-center">
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5 }} className="absolute inset-0 w-full h-full">
-            {isVideo(heroMediaUrl) ? (
-              <video 
-                src={heroMediaUrl} 
-                autoPlay 
-                muted 
-                loop 
-                playsInline 
-                className="w-full h-full object-cover opacity-60 brightness-110 contrast-125"
-              />
-            ) : (
-              <Image 
-                src={heroMediaUrl} 
-                alt="Festival Vibe" 
-                fill
-                className="object-cover opacity-60 brightness-110 contrast-125"
-                priority
-                unoptimized={true}
-              />
-            )}
-          </motion.div>
+        <div className="absolute inset-0 z-0 overflow-hidden bg-black">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={currentIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute inset-0 w-full h-full"
+            >
+              {isVideo(heroItems[currentIndex]) ? (
+                <video 
+                  src={heroItems[currentIndex]} 
+                  autoPlay 
+                  muted 
+                  loop 
+                  playsInline 
+                  className="w-full h-full object-cover opacity-60 brightness-110 contrast-125"
+                />
+              ) : (
+                <Image 
+                  src={heroItems[currentIndex]} 
+                  alt={`Festival Vibe ${currentIndex + 1}`} 
+                  fill
+                  className="object-cover opacity-60 brightness-110 contrast-125"
+                  priority
+                  unoptimized={true}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         </div>
+        
         <div className="max-w-5xl mx-auto w-full relative z-10 text-center px-6">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-6 md:space-y-10">
             <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-5 py-1.5 md:py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-3xl text-[7px] md:text-[9px] font-black uppercase tracking-[0.4em] text-white italic shadow-2xl">
@@ -105,12 +136,29 @@ export default function LandingPage() {
             </div>
             <div className="pt-2"><Countdown targetDate={settings?.eventDate} /></div>
             <div className="mt-8 md:mt-10">
-              <Button asChild size="lg" className="h-14 md:h-18 px-10 md:px-14 text-[12px] md:text-[16px] font-black rounded-2xl bg-secondary text-black uppercase tracking-[0.2em] shadow-[0_0_40px_rgba(0,255,255,0.6)] hover:scale-105 transition-all border-none italic group">
-                <a href={ticketingUrl} target="_blank">RÉSERVER MON BILLET <Ticket className="ml-2 md:ml-4 w-6 md:w-8 h-6 md:h-8 group-hover:rotate-12 transition-transform" /></a>
-              </Button>
+              {ticketingUrl ? (
+                <Button asChild size="lg" className="h-14 md:h-18 px-10 md:px-14 text-[12px] md:text-[16px] font-black rounded-2xl bg-secondary text-black uppercase tracking-[0.2em] shadow-[0_0_40px_rgba(240,230,210,0.4)] hover:scale-105 transition-all border-none italic group">
+                  <a href={ticketingUrl} target="_blank">RÉSERVER MON BILLET <Ticket className="ml-2 md:ml-4 w-6 md:w-8 h-6 md:h-8 group-hover:rotate-12 transition-transform" /></a>
+                </Button>
+              ) : (
+                <WaitlistDialog />
+              )}
             </div>
           </motion.div>
         </div>
+
+        {/* Indicators */}
+        {heroItems.length > 1 && (
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+            {heroItems.map((_, i) => (
+              <button 
+                key={i} 
+                onClick={() => setCurrentIndex(i)}
+                className={`h-1.5 rounded-full transition-all duration-500 ${i === currentIndex ? 'w-8 bg-primary' : 'w-2 bg-white/30'}`}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* VISION SECTION */}
@@ -173,13 +221,15 @@ export default function LandingPage() {
                   whileInView={{ opacity: 1, scale: 1 }} 
                   className={`relative aspect-square rounded-[3rem] overflow-hidden border-[6px] border-white/10 group ${i % 5 === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
                 >
-                  <Image 
-                    src={item.imageUrl} 
-                    alt="Gallery item" 
-                    fill
-                    className="object-cover transition-transform duration-1000 group-hover:scale-110 brightness-[0.9] group-hover:brightness-100" 
-                    unoptimized={true}
-                  />
+                  {item.imageUrl && (
+                    <Image 
+                      src={item.imageUrl} 
+                      alt="Gallery item" 
+                      fill
+                      className="object-cover transition-transform duration-1000 group-hover:scale-110 brightness-[0.9] group-hover:brightness-100" 
+                      unoptimized={true}
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="absolute bottom-8 left-8 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
                     <div className="text-[11px] font-black text-white uppercase tracking-widest italic">{item.description || 'VIBE 2027'}</div>
@@ -222,13 +272,15 @@ export default function LandingPage() {
               <div className="w-full bg-white p-10 md:p-20 rounded-[5rem] shadow-[0_30px_100px_rgba(0,0,0,0.5)] flex flex-wrap justify-center items-center gap-10 md:gap-20">
                 {sponsors.map((sponsor) => (
                   <motion.div key={sponsor.id} whileHover={{ scale: 1.1 }} className="h-12 md:h-16 relative w-32 md:w-48 transition-all">
-                    <Image 
-                      src={sponsor.logoUrl} 
-                      alt={sponsor.name} 
-                      fill 
-                      className="object-contain" 
-                      unoptimized={true} 
-                    />
+                    {sponsor.logoUrl && (
+                      <Image 
+                        src={sponsor.logoUrl} 
+                        alt={sponsor.name} 
+                        fill 
+                        className="object-contain" 
+                        unoptimized={true} 
+                      />
+                    )}
                   </motion.div>
                 ))}
               </div>

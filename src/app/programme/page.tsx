@@ -6,6 +6,7 @@ import { useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase
 import { collection, doc } from 'firebase/firestore';
 import { Ticket, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { WaitlistDialog } from '@/components/WaitlistDialog';
 
 const defaultProgram = [
   { time: "12:00", title: "Ouverture des Portes", desc: "Immersion et ouverture des villages thématiques." },
@@ -54,7 +55,7 @@ export default function ProgrammePage() {
   }, [firestore]);
   const { data: settings } = useDoc(settingsRef);
   
-  const ticketingUrl = settings?.ticketingUrl || 'https://omtevents.com';
+  const ticketingUrl = settings?.ticketingUrl;
 
   const activeProgram = dynamicProgram && dynamicProgram.length > 0 
     ? [...dynamicProgram].sort((a,b) => a.time.localeCompare(b.time)) 
@@ -84,11 +85,15 @@ export default function ProgrammePage() {
         </div>
 
         <div className="mt-20 text-center">
-          <Button asChild className="bg-secondary text-black font-black text-[12px] h-16 px-14 rounded-2xl tracking-widest shadow-[0_0_40px_rgba(0,255,255,0.4)] transition-all hover:scale-105 border-none italic">
-            <a href={ticketingUrl} target="_blank">
-              <Ticket className="w-6 h-6 mr-3" /> RÉSERVER MON BILLET
-            </a>
-          </Button>
+          {ticketingUrl ? (
+            <Button asChild className="bg-secondary text-black font-black text-[12px] h-16 px-14 rounded-2xl tracking-widest shadow-[0_0_40px_rgba(0,255,255,0.4)] transition-all hover:scale-105 border-none italic">
+              <a href={ticketingUrl} target="_blank">
+                <Ticket className="w-6 h-6 mr-3" /> RÉSERVER MON BILLET
+              </a>
+            </Button>
+          ) : (
+            <WaitlistDialog label="LISTE D'ATTENTE BILLETS" />
+          )}
           <p className="mt-4 text-[9px] text-white/30 font-black uppercase italic tracking-widest">Le programme peut être sujet à des ajustements ⚡</p>
         </div>
       </div>

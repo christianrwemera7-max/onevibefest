@@ -9,8 +9,8 @@ const SidebarContent = () => (
       <div key={i} className="flex flex-col items-center gap-12">
         {/* ÉTOILE BRILLANTE */}
         <div className="relative">
-          <Star className="w-4 h-4 text-white fill-white animate-pulse" />
-          <div className="absolute inset-0 bg-white/20 blur-lg rounded-full scale-150" />
+          <Star className="w-4 h-4 text-secondary fill-secondary animate-pulse" />
+          <div className="absolute inset-0 bg-secondary/20 blur-lg rounded-full scale-150" />
         </div>
         
         {/* TEXTE VERTICAL DÉFILANT */}
